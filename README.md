@@ -1,4 +1,5 @@
 Dataset Details: healthCare_stroke_dataset.csv
+Path : Capstone_Project_stroke/dataset/healthCare_stroke_dataset.csv
 
 Null Value Analysis and Data type correction:
 Column "BMI" has null values of count 201 which is 4.1%. Null values are replaced with Median Value of BMI column. Mean() is not considered because mean value gets impacted by the Outliers much, so median is used.
