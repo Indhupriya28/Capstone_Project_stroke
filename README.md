@@ -191,3 +191,118 @@ Confidence interval excludes zero.                |
 --------------------------------------------------
 
 The AUC difference is -0.012, indicated the model with c=0.01 perform higher than model with C=1.0.Since the confidence interval excludes zero and the AU curve is negative, the result indicate that the codel with c=0.01 consistenly achieved a slightly higher AUC than c=1.0 across the bootstrap samples.
+
+
+
+=================================================================================================
+
+***PART-III***
+
+-------------------------------
+Decision Tree performance :
+Taining Accuracy : 99.93
+Test Accuracy : 91.42
+------------------------------
+
+From the training and test accuracy i could see some gaps- this shows slight overfitting. However, by looking at the test accuracy, i can say that model has learned some patterns to predict the unknown cases as expected..
+
+    *Decision Trees are considered as high-variance models because small chanes in the training data can produce different tree strucutre and different predictions. During training, a decision tree build a model by selecting the best split at each node. 
+    *Once a split is made, the algo does not modify the earlier decisions. As a result, tree become highly tailored on training data, especially when there is no constraints which increase the risk of overfitting.
+
+2.
+** ROLE of max_depth:
+    It tells how many levels the decision tree is allowed to grow.A tree with large depth can learn complex patterns, but it also memorize the training data leads to overfitting. restricting the maximum depth, improves models ability to generalize to unseen data.
+
+** ROLE of min_samples_split:
+    It specifies the minimum number of samples requried for a node to be split. If a node contains fewer samples, then it became a leaf node no split happens further. As a result, model becomes more stable and less prone to overfitting
+
+* COMPARISON OF Decision Tree and Controlled version:
+
+----------------------------
+Controlled: 
+Taining Accuracy : 95.35
+Test Accuracy : 93.47
+---------------------------
+
+In Controlled version, training accuracy is bit reduced, however test accuracy is increased. Rather than memorizing the data, model learned the pattern.Thus making a model more reliable.
+
+With 99% accuracy in unconstrained version- tells model overfit the training data.
+
+3. GINI VS ENTROPY:
+    Gini=1−∑p^2
+    Entropy=−∑pi*log2*(p)
+
+    Gini = 0 => means that the node is completely pure. Every sample in the node belongs to same class.
+    Comparison of Gini and ENtropy : 
+
+        Gini Test Accuracy : 93.47
+        Entropy Test Accuracy :93.57
+
+        The difference between two model is 0.10%. Both performs almost equally well on this dataset.
+
+
+4. RANDOM FOREST CLASSIFIER:
+    Random forest classifier calculates feature importance by measuring how much each feature reduces Gini impurity when data split happens.Each split decrease the impurity of a node. Features that consistently produce large impurity reductions receive higher importance values.
+
+    It differ from the linear Regression coefficient. Linear regression tells the direction, magnitude of feature's effect on predicted value.
+Random Forest "
+    => measures how useful a feature  for making accurate split
+
+BAGGING in RANDOMFOREST
+
+    Random Forest is based on the bagging (Bootstrap Aggregating) technique. Instead of training a single decision tree on the entire training dataset, it builds many decision trees. Each tree is trained on a bootstrap sample, which is created by randomly selecting training samples with replacement. As a result, some observations may appear multiple times in a bootstrap sample.
+
+     In addition, at every split, the algorithm considers only a random subset of features (approximately √number of features for classification) instead of evaluating all features. This increases diversity among the trees.
+
+4b. Feature ablation study
+
+    The removed features did contribute some information because removing them caused a minor drop in Auc-score. The performace decreased as 0.0055. So reduced features are not major contributor in stroke prediction. Therefore, reduced model can be considered instead of full model (considering there is not major impact in auc score)
+    With fewer features, requires less data for processing, it reduces the memory space,long term maintenance effort in the production (real-world).
+
+*5.Cross-validated comparison:*
+    Cross validation gives a more reliable estimate than single train-test model because the model is trained and evaluated multiple times using different subsets of data.
+    In 5-fold CV, the dataset is divided into 5 equal parts. During each iteration, 4 folds used for training and one fold is for testing.This process is repeated until every fold has serves as the validation/test set exactly once. The final performance is calculated as the average of the 5 validation scores.
+    Using StrtifiedKFold, this ensures that each fold contains same proportion of both classes(stroke and non-stroke).This is importance for this dataset because the targer classes are imbalanced. As a result, CV provides more stable result on how well models are expected to perform on unseen data.
+
+
+*6.Hyperparameter tuning with GridSearchCV:*
+    Model Configuration evaluated :
+        hyperparameter configurations : 3 * 3* 2 =18
+        Each combination has 5-fold-cross-validation,
+            18 * 5 = 90 Random Forest model were trained and evaluated during this grid search.
+
+    Grid search evaluated every possible combination of the specified hyperparameter values.The best combination wil be found here. However, it is expensive and time consuming when there are many hyperparameters.
+    RandomForest -> select fixed number fo hyperparameter combinations to evaluate.This makes it much faster and more efficient for large dataset.
+    Trade-off doesn't guarantee finding the best combination, but it finds a solution that is very close to the optimum while using less computation.
+
+
+*7.Manual learning curve 
+   Training Fraction  Training AUC  Test AUC
+0                0.2      0.980260  0.809081
+1                0.4      0.982610  0.818544
+2                0.6      0.984624  0.823101
+3                0.8      0.986079  0.825641
+4                1.0      0.985826  0.827076ve.
+
+    7.a) the training ROC-AUC did not decrease as the training fraction increase.It is high (0.98) across all training set sizes. This indicates that tuned Random forest was able to fit the trainingdata well even as more samples were added. Use of min_samples_leaf =5 control overfitting while still allowing the model to achieve excellent performance on the training data.
+
+    7.b) The test AUC increase  with more training data. The model benefited from having more training examples and that additional data helped imporve its ability to generalize to unseen samples.
+
+    7.c) Conclusion : Test ROC-AUC continued to improve as more training data was used and had not fully plateaud by the time the full trianing dataset was reached. Although improvements became smaller with larger datasets, the upward trend suggests that the model is still somewhat limited by the amount of avialable training data rather its capacity.
+
+
+**9. Comparison Table:
+
+Cross-Validation Results :
+                 Model  Mean ROC-AUC score   Standard deviation
+0  Logistic Regression             0.815782            0.009800
+1        Decision Tree             0.794503            0.014910
+2        Random Forest             0.827172            0.028313
+3    Gradient Boosting             0.837435            0.026170
+4  Tuned Random Forest             0.8514
+
+I recommend the Gradient Boosting model for deployment, it has highest ROC-AUC curve indicate it able to distinguish between stroke and non-stroke cases. 
+Although the tuned Random Forest achieved the highest cross-validation ROC-AUC (0.8514) during Grid Search, it was not evaluated on the held-out test set in your current workflow.
+
+Without that independent test-set evaluation, the safest recommendation is the Gradient Boosting model, as it demonstrated consistently strong performance on both cross-validation and the test data
+
