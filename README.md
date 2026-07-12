@@ -228,7 +228,7 @@ In Controlled version, training accuracy is bit reduced, however test accuracy i
 
 With 99% accuracy in unconstrained version- tells model overfit the training data.
 
-3. GINI VS ENTROPY:
+**3. GINI VS ENTROPY:**
     Gini=1−∑p^2
     Entropy=−∑pi*log2*(p)
 
@@ -241,31 +241,31 @@ With 99% accuracy in unconstrained version- tells model overfit the training dat
         The difference between two model is 0.10%. Both performs almost equally well on this dataset.
 
 
-4. RANDOM FOREST CLASSIFIER:
+**4. RANDOM FOREST CLASSIFIER:**
     Random forest classifier calculates feature importance by measuring how much each feature reduces Gini impurity when data split happens.Each split decrease the impurity of a node. Features that consistently produce large impurity reductions receive higher importance values.
 
     It differ from the linear Regression coefficient. Linear regression tells the direction, magnitude of feature's effect on predicted value.
 Random Forest "
     => measures how useful a feature  for making accurate split
 
-BAGGING in RANDOMFOREST
+**BAGGING in RANDOMFOREST**
 
     Random Forest is based on the bagging (Bootstrap Aggregating) technique. Instead of training a single decision tree on the entire training dataset, it builds many decision trees. Each tree is trained on a bootstrap sample, which is created by randomly selecting training samples with replacement. As a result, some observations may appear multiple times in a bootstrap sample.
 
      In addition, at every split, the algorithm considers only a random subset of features (approximately √number of features for classification) instead of evaluating all features. This increases diversity among the trees.
 
-4b. Feature ablation study
+**4b. Feature ablation study**
 
     The removed features did contribute some information because removing them caused a minor drop in Auc-score. The performace decreased as 0.0055. So reduced features are not major contributor in stroke prediction. Therefore, reduced model can be considered instead of full model (considering there is not major impact in auc score)
     With fewer features, requires less data for processing, it reduces the memory space,long term maintenance effort in the production (real-world).
 
-*5.Cross-validated comparison:*
+**5.Cross-validated comparison:**
     Cross validation gives a more reliable estimate than single train-test model because the model is trained and evaluated multiple times using different subsets of data.
     In 5-fold CV, the dataset is divided into 5 equal parts. During each iteration, 4 folds used for training and one fold is for testing.This process is repeated until every fold has serves as the validation/test set exactly once. The final performance is calculated as the average of the 5 validation scores.
     Using StrtifiedKFold, this ensures that each fold contains same proportion of both classes(stroke and non-stroke).This is importance for this dataset because the targer classes are imbalanced. As a result, CV provides more stable result on how well models are expected to perform on unseen data.
 
 
-*6.Hyperparameter tuning with GridSearchCV:*
+**6.Hyperparameter tuning with GridSearchCV:**
     Model Configuration evaluated :
         hyperparameter configurations : 3 * 3* 2 =18
         Each combination has 5-fold-cross-validation,
@@ -276,7 +276,7 @@ BAGGING in RANDOMFOREST
     Trade-off doesn't guarantee finding the best combination, but it finds a solution that is very close to the optimum while using less computation.
 
 
-*7.Manual learning curve 
+**7.Manual learning curve**
    Training Fraction  Training AUC  Test AUC
 0                0.2      0.980260  0.809081
 1                0.4      0.982610  0.818544
@@ -291,7 +291,7 @@ BAGGING in RANDOMFOREST
     7.c) Conclusion : Test ROC-AUC continued to improve as more training data was used and had not fully plateaud by the time the full trianing dataset was reached. Although improvements became smaller with larger datasets, the upward trend suggests that the model is still somewhat limited by the amount of avialable training data rather its capacity.
 
 
-**9. Comparison Table:
+**9. Comparison Table:**
 
 Cross-Validation Results :
                  Model  Mean ROC-AUC score   Standard deviation
@@ -305,4 +305,104 @@ I recommend the Gradient Boosting model for deployment, it has highest ROC-AUC c
 Although the tuned Random Forest achieved the highest cross-validation ROC-AUC (0.8514) during Grid Search, it was not evaluated on the held-out test set in your current workflow.
 
 Without that independent test-set evaluation, the safest recommendation is the Gradient Boosting model, as it demonstrated consistently strong performance on both cross-validation and the test data
+
+
+======================================================================================================
+
+**PART-IV**
+
+For my Stroke prediction Dataset i'm choosing Tabular REcord Batch Scoring.
+    This track used to assess the health risk of a individual patient. Each record is formatted as JSON onject and send to LLM, return risk assessment in json format. The final json is validated aganist the json schema.
+
+
+**SYSTEM PROMPT :** 
+
+You are a healthcare risk assessment assistant.
+
+Your task is to assess a patient's stroke risk based on the provided health record and return a structured JSON assessment.
+
+Rules:
+1. Do not diagnose diseases.
+2. Do not prescribe medications.
+3. Do not claim that the patient will definitely have a stroke.
+4. Assess the patient's overall risk based on age, hypertension, heart disease, average glucose level, BMI, and smoking status.
+5. Return ONLY valid JSON.
+6. The JSON must contain EXACTLY these five fields:
+   - risk_tier
+   - flag_for_review
+   - primary_signal
+   - confidence
+   - recommended_action
+7. Do not rename any key.
+8. Do not include additional fields.
+
+Example Input:
+{
+    "age": 68,
+    "hypertension": 1,
+    "heart_disease": 0,
+    "avg_glucose_level": 180,
+    "bmi": 31,
+    "smoking_status": "formerly smoked"
+}
+
+Example Output:
+{
+    "risk_tier": "High",
+    "flag_for_review": true,
+    "primary_signal": "High glucose level and hypertension",
+    "confidence": "High",
+    "recommended_action": "Consult a healthcare professional for further evaluation."
+}
+
+
+**USER PROMPT TEMPLATE:**
+
+Assess the following patient record and return ONLY valid JSON.
+
+Patient Profile
+
+Age: <age>
+Hypertension: <0 or 1>
+Heart Disease: <0 or 1>
+Average Glucose Level: <avg_glucose_level>
+BMI: <bmi>
+Smoking Status: <smoking_status>
+
+
+**TEMPERATURE = 0** , because this task requires consistent output. At temperature =0, model selects highest probability token at each step, results in deterministic responses. The goal here is structured risk assessment , not creative text generation so low temperature is best choice.
+
+
+**TEMPERATURE A/B COMPARISON:**
+
+| Input    | Temp = 0                        | Temp = 0.7                            | Key Difference                    |
+| -------- | ------------------------------- | ------------------------------------- | --------------------------------- |
+| prompt 1 | Low risk, regular check-ups     | Low risk, added BP/glucose monitoring | Slightly different recommendation |
+| prompt 2 | Medium risk, consult doctor     | Medium risk, consult doctor           | No difference                     |
+| prompt 3 | High risk, immediate evaluation | High risk, personalized assessment    | Recommendation wording changed    |
+
+
+Temperature controls how LLM select token while generating a response. A temperature with lower value, produce more deterministic and consistent outputs.For the strucutre task, temperature with 0 or sometimes 0.2 is ideal, depends on the usecase. A higher temperature (towards the value of 1), make LLM to produce random values( model hallucinates).
+
+
+============================================================================================
+
+**3.Structured output handling (all tracks):**
+
+| Input Record                                                                   | LLM Assessment JSON                                                                                                                            | Validation Status |
+| ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| **Record 1:** Age 45, normal glucose, BMI 23, no hypertension, never smoked    | `{"risk_tier":"Low", "flag_for_review":false, "primary_signal":"No significant risk factors", ...}`                                            | **Pass**          |
+| **Record 2:** Age 65, hypertension, glucose 180, BMI 31, formerly smoked       | `{"risk_tier":"Medium", "flag_for_review":true, "primary_signal":"High glucose level and hypertension", ...}`                                  | **Pass**          |
+| **Record 3:** Age 72, hypertension, heart disease, glucose 210, BMI 34, smoker | `{"risk_tier":"High", "flag_for_review":true, "primary_signal":"High glucose level, hypertension, heart disease, high BMI, and smoking", ...}` | **Pass**          |
+
+
+================================================================================================
+**Demonstrate the feature end-to-end**
+
+| Input                   | LLM Output        | Valid JSON | Pass/Block  |
+| ----------------------- | ----------------- | ---------- | ----------- |
+| Record 1                | Risk Tier: Low    | Pass       | Pass        |
+| Record 2                | Risk Tier: Medium | Pass       | Pass        |
+| Record 3                | Risk Tier: High   | Pass       | Pass        |
+| Record containing email | Not generated     | N/A        | **Blocked** |
 
