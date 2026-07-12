@@ -1,7 +1,9 @@
 Dataset Details: healthCare_stroke_dataset.csv
-Path : Capstone_Project_stroke/dataset/healthCare_stroke_dataset.csv
+Path : [Capstone_Project_stroke/dataset/healthCare_stroke_dataset.csv](https://github.com/Indhupriya28/Capstone_Project_stroke/tree/main/dataset)
+Images : https://github.com/Indhupriya28/Capstone_Project_stroke/tree/main/images
 
-Null Value Analysis and Data type correction:
+
+**Null Value Analysis and Data type correction:**
 Column "BMI" has null values of count 201 which is 4.1%. Null values are replaced with Median Value of BMI column. Mean() is not considered because mean value gets impacted by the Outliers much, so median is used.
 
 Here, BMI is of type "Object" and values are written within  "". This double quote is handled by string replace() and Type is changed to numeric.Then Null values are handled.
@@ -56,18 +58,18 @@ Number of outliers for column " BMI" => 126             |
         Working category has outliers. However Never working category has less outliers, also if I see the count of this category it is less when compared to others. This could be the reason for less outliers.
 
 
-8. Correlation Heat map:
+**8. Correlation Heat map:**
 
     Highest Absolute Correlation : Age and BMI (0.32).
     As Age increases, Bmi increases. However, this is not casual realtionship. Only Age cant be a factor for BMI to increase, third factors also there. Like lack of exercise, food habit.. also matters.
     One plausiable explanation : Lack of Physical activity due to medical conditions or some other factors. This could also add as a reson for the BMI to increase.
 
-9.A Imputation strategy comparison:
+**9.A Imputation strategy comparison:**
     Most Skewed Data: "AVG_GLUCOSE_LEVEL" : It is right skewed (postive) meaning it has outliers. 
     For "BMI" -> Slightly skewed (right).THere is no huge difference between mean and median here. 
     Choosing mean() ,wont be a right option- outlier has impact on the mean. I prefer median() because it consider the middle value/ avg of the middle values. Hence it wont be impacted by the outliers.
 
-9.B Spearman rank correlation
+**9.B Spearman rank correlation**
     1st PAIR : age vs avg_glucose_level
         Pearson > spearman . It indicates the Linear rather than monotonic.
     2nd PAIR : hypertension vs avg_glucose_level
@@ -88,7 +90,9 @@ Number of outliers for column " BMI" => 126             |
 
 ==============================================================================================================================================================
 
-PART-II
+-----------
+**PART-II**
+-----------
 
 1. Load dataset:
     Considered dataset has a Target (binary value) column "Stroke". This I consider for the classification
