@@ -1,4 +1,5 @@
 Dataset Details: healthCare_stroke_dataset.csv
+Python Script : https://github.com/Indhupriya28/Capstone_Project_stroke/tree/main/src
 Path : [Capstone_Project_stroke/dataset/healthCare_stroke_dataset.csv](https://github.com/Indhupriya28/Capstone_Project_stroke/tree/main/dataset)
 Images : https://github.com/Indhupriya28/Capstone_Project_stroke/tree/main/images
 
